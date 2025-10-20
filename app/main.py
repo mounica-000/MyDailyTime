@@ -1,5 +1,11 @@
 from fastapi import FastAPI
-from app.routers import tasks
+from routers import tasks
+from database.db_setup import Base, engine
+from database import models
+
+print("Creating database tables...")
+Base.metadata.create_all(bind=engine)
+print("Database tables created successfully.")
 
 app = FastAPI(
     title="MyDailyTime",
