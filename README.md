@@ -8,8 +8,12 @@
 
 - Log and categorize daily activities
 - Track productivity trends over time
-- View analytics dashboards and progress summaries
 - RESTful API built with FastAPI
+
+## Future additions
+
+- View analytics dashboards and progress summaries
+- More to come :)
 
 ---
 

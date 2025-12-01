@@ -1,11 +1,6 @@
 from fastapi import FastAPI
-from routers import tasks
-from database.db_setup import Base, engine
-from database import models
-
-print("Creating database tables...")
-Base.metadata.create_all(bind=engine)
-print("Database tables created successfully.")
+from pydantic import BaseModel
+from typing import Optional, List
 
 app = FastAPI(
     title="MyDailyTime",
@@ -13,7 +8,29 @@ app = FastAPI(
     version="0.1.0"
 )
 
-app.include_router(tasks.router)
+# Task Model
+class Task(BaseModel):
+    name: str
+    label: Optional[str] = None
+    duration_minutes: int
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+
+# In-memory DB for now
+tasks: List[dict] = []
+
+# POST endpoint for tasks
+@app.post("/tasks")
+def create_task(task: Task):
+    new_task = task.dict()
+    new_task["id"] = len(tasks) + 1   # simple ID generation for now
+    tasks.append(new_task)
+    return new_task
+
+# GET endpoint (for testing)
+@app.get("/tasks")
+def list_tasks():
+    return tasks
 
 @app.get("/")
 def root():
