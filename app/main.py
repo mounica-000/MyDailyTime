@@ -1,37 +1,24 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import Optional, List
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
 
-app = FastAPI(
-    title="MyDailyTime",
-    description="A productivity tracking API that helps you monitor and analyze how you spend your time each day.",
-    version="0.1.0"
-)
+from . import crud, models, schemas
+from .database import SessionLocal, engine, get_db
 
-# Task Model
-class Task(BaseModel):
-    name: str
-    label: Optional[str] = None
-    duration_minutes: int
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+# Create the database tables (only needed if they don't exist)
+models.Base.metadata.create_all(bind=engine)
 
-# In-memory DB for now
-tasks: List[dict] = []
-
-# POST endpoint for tasks
-@app.post("/tasks")
-def create_task(task: Task):
-    new_task = task.dict()
-    new_task["id"] = len(tasks) + 1   # simple ID generation for now
-    tasks.append(new_task)
-    return new_task
-
-# GET endpoint (for testing)
-@app.get("/tasks")
-def list_tasks():
-    return tasks
+app = FastAPI(title="MyDailyTime")
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to MyDailyTime API!"}
+    return {"message": "API is live!"}
+
+@app.post("/tasks", response_model=schemas.Task)
+def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
+    return crud.create_task(db=db, task=task)
+
+@app.get("/tasks", response_model=List[schemas.Task])
+def read_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    tasks = crud.get_tasks(db, skip=skip, limit=limit)
+    return tasks
