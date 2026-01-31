@@ -21,3 +21,9 @@ def create_task(db: Session, task: schemas.TaskCreate):
     # Refresh to get the generated ID back from the DB
     db.refresh(db_task)
     return db_task
+
+def get_tasks(db: Session, label: str = None, skip: int = 0, limit: int = 100):
+    query = db.query(models.Task)
+    if label:
+        query = query.filter(models.Task.label == label)
+    return query.offset(skip).limit(limit).all()
