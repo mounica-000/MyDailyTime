@@ -25,6 +25,7 @@ class TaskLabel(str, Enum):
     CAREER = "career"
     SLEEP = "sleep"
     BREAK = "break"
+    DISTRACTED = "distracted"
     OTHER = "other"
 
 class TaskBase(BaseModel):
@@ -41,3 +42,11 @@ class Task(TaskBase):
 
     class Config:
         from_attributes = True
+
+
+# --- Analytics Schemas ---
+
+class TaskSummary(BaseModel):
+    label: str
+    total_minutes: int
+    percentage: float
